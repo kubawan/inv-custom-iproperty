@@ -140,7 +140,7 @@ namespace InvCustomiPropertyAddIn
             try
             {
                 //Get custom property set
-                invPropertySet = invDocument.PropertySets["Inventor Uset Defined Properties"];
+                invPropertySet = invDocument.PropertySets["Inventor User Defined Properties"];
 
                 //Get existing property if exsist
                 invProperty = null;
