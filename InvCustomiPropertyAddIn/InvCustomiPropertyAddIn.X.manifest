@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+
+<assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
+
+  <assemblyIdentity name="InvCustomiPropertyAddIn" version="1.0.0.0"></assemblyIdentity>
+
+  <clrClass clsid="{889caee5-3c6a-436f-b6a6-07731ed72ac3}" progid="InvCustomiPropertyAddIn.StandardAddInServer" threadingModel="Both" name="InvCustomiPropertyAddIn.StandardAddInServer" runtimeVersion=""></clrClass>
+
+  <file name="InvCustomiPropertyAddIn.dll" hashalg="SHA1"></file>
+
+</assembly>
