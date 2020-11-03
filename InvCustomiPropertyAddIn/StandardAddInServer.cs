@@ -3,6 +3,7 @@ using System.Runtime.InteropServices;
 using Inventor;
 using Microsoft.Win32;
 using System.Windows.Forms;
+using stdole;
 
 namespace InvCustomiPropertyAddIn
 {
@@ -23,6 +24,10 @@ namespace InvCustomiPropertyAddIn
         private Inventor.Property invProperty;
         private Inventor.DocumentTypeEnum invDocumentTypePart;
         private Inventor.DocumentTypeEnum invDocumentTypeAssembly;
+        private Inventor.ButtonDefinition m_buttonDef;
+        private Inventor.UserInterfaceEvents m_uiEvents;
+        private string m_ClientID = "{311a4c02-49df-4947-a01c-47765ec06b27}";
+
 
         //Events handler delegates
         private Inventor.DocumentEventsSink_OnSaveEventHandler DocumentEventsSink_OnSaveEventHandlerDelegate;
@@ -45,6 +50,26 @@ namespace InvCustomiPropertyAddIn
                 //Initialize save event delegate
                 m_appEventsSave = m_inventorApplication.ApplicationEvents;
                 m_appEventsSave.OnSaveDocument += new ApplicationEventsSink_OnSaveDocumentEventHandler(ApplicationEvents_OnSaveDocument);
+
+                //Get a reference to the UserInterfaceManager object
+                Inventor.UserInterfaceManager UIManager = m_inventorApplication.UserInterfaceManager;
+
+                //Get a reference to the ControlDefinitions object
+                Inventor.ControlDefinitions contorlDefs = m_inventorApplication.CommandManager.ControlDefinitions;
+
+                //Create the button definition
+                m_buttonDef = contorlDefs.AddButtonDefinition("One", "UIRibbonSampleOne", CommandTypesEnum.kNonShapeEditCmdType, m_ClientID);
+
+                //Call the function to add information to the userinterface
+                if(firstTime == true)
+                {
+                    CreateUserInterface();
+                }
+
+                //Connect to UI events to be able to handle UI reset
+                m_uiEvents = m_inventorApplication.UserInterfaceManager.UserInterfaceEvents;
+
+
             }
             catch (Exception ex)
             {
@@ -95,6 +120,25 @@ namespace InvCustomiPropertyAddIn
 
         #endregion
         #region Methods
+        //Create AddIn UI ribbon method
+        private void CreateUserInterface()
+        {
+            //Get a reference to the UserManagerInterface object
+            Inventor.UserInterfaceManager UIManager = m_inventorApplication.UserInterfaceManager;
+
+            //Get the zero doc ribbon
+            Inventor.Ribbon zeroRibbon = UIManager.Ribbons["ZeroDoc"];
+
+            //Get the getting started tab
+            Inventor.RibbonTab startedTab = zeroRibbon.RibbonTabs["id_GetStarted"];
+
+            //Get the new feature panel
+            Inventor.RibbonPanel newFeaturePanel = startedTab.RibbonPanels["id_Panel_GetStartedWhatsNew"];
+
+            //Add a button to the panel, using previously created button def
+            newFeaturePanel.CommandControls.AddButton(m_buttonDef, true);
+        }
+
         //Save event method
         private void ApplicationEvents_OnSaveDocument(_Document DocumentObject, EventTimingEnum BeforeOrAfter, NameValueMap Context, out HandlingCodeEnum HandlingCode)
         {

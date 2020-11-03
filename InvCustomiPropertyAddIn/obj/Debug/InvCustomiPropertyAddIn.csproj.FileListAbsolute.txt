@@ -1,7 +1,6 @@
 C:\Users\Kuba\Source\Repos\kubawan\inv-custom-iproperty\InvCustomiPropertyAddIn\bin\Debug\InvCustomiPropertyAddIn.dll
 C:\Users\Kuba\Source\Repos\kubawan\inv-custom-iproperty\InvCustomiPropertyAddIn\bin\Debug\InvCustomiPropertyAddIn.pdb
 C:\Users\Kuba\Source\Repos\kubawan\inv-custom-iproperty\InvCustomiPropertyAddIn\bin\Debug\autodesk.inventor.interop.dll
-C:\Users\Kuba\Source\Repos\kubawan\inv-custom-iproperty\InvCustomiPropertyAddIn\bin\Debug\stdole.dll
 C:\Users\Kuba\Source\Repos\kubawan\inv-custom-iproperty\InvCustomiPropertyAddIn\obj\Debug\InvCustomiPropertyAddIn.csprojAssemblyReference.cache
 C:\Users\Kuba\Source\Repos\kubawan\inv-custom-iproperty\InvCustomiPropertyAddIn\obj\Debug\InvCustomiPropertyAddIn.csproj.CoreCompileInputs.cache
 C:\Users\Kuba\Source\Repos\kubawan\inv-custom-iproperty\InvCustomiPropertyAddIn\obj\Debug\InvCustomiPropertyAddIn.csproj.CopyComplete
