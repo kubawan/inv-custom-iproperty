@@ -4,6 +4,8 @@ using Inventor;
 using Microsoft.Win32;
 using System.Windows.Forms;
 using stdole;
+using System.Drawing;
+using InvAddIn;
 
 namespace InvCustomiPropertyAddIn
 {
@@ -34,6 +36,8 @@ namespace InvCustomiPropertyAddIn
         //Events handler delegates
         //private Inventor.DocumentEventsSink_OnSaveEventHandler DocumentEventsSink_OnSaveEventHandlerDelegate;
         private Inventor.ApplicationEventsSink_OnNewDocumentEventHandler ApplicationEventsSink_OnNewDocumentEventHandler;
+        private Inventor.UserInterfaceEventsSink_OnResetRibbonInterfaceEventHandler UserInterfaceEventsSink_OnResetRibbonInterfaceEventHandler;
+
         public StandardAddInServer()
         {
         }
@@ -77,7 +81,7 @@ namespace InvCustomiPropertyAddIn
 
                 //Connect to UI events to be able to handle UI reset
                 m_uiEvents = m_inventorApplication.UserInterfaceManager.UserInterfaceEvents;
-
+                m_uiEvents.OnResetRibbonInterface += new UserInterfaceEventsSink_OnResetRibbonInterfaceEventHandler(m_uiEvents_OnResetRibbonInterface);
 
             }
             catch (Exception ex)
@@ -134,6 +138,7 @@ namespace InvCustomiPropertyAddIn
 
         #endregion
         #region Methods
+
         //Create AddIn UI ribbon method
         private void CreateUserInterface()
         {
@@ -214,7 +219,13 @@ namespace InvCustomiPropertyAddIn
                 TestiPropertyUpdate();
             }
 
+            DockableWindow();
+
             HandlingCode = HandlingCodeEnum.kEventHandled;
+        }
+        private void m_uiEvents_OnResetRibbonInterface(NameValueMap Context)
+        {
+            CreateUserInterface();
         }
         private string GetPropertyName()
         {
@@ -279,6 +290,47 @@ namespace InvCustomiPropertyAddIn
             {
                 MessageBox.Show(ex.ToString(), "AddIn Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+        }
+        public void DockableWindow()
+        {
+            //Create Dockable Window iProperty
+            Inventor.UserInterfaceManager uiManager = m_inventorApplication.UserInterfaceManager;
+            Inventor.DockableWindow dockWindow;
+            dockWindow = uiManager.DockableWindows.Add(m_ClientID, "CustomiProperty", "iProperty");
+
+            InvAddIn.CmbBoxiProp FrmComboBox = new InvAddIn.CmbBoxiProp();
+            //Create WinForm in dockWindow
+            dockWindow.Visible = false;
+            dockWindow.DisabledDockingStates = DockingStateEnum.kDockTop;
+            dockWindow.AddChild(FrmComboBox.Handle);
+            FrmComboBox.Show();
+        }
+        /*public void AddItemsComboBox()
+        {
+            string propertyName;
+            InvAddIn.CmbBoxiProp FrmComboBox = new InvAddIn.CmbBoxiProp();
+            invDocument = m_inventorApplication.ActiveDocument;
+            PropertySet propertySet = invDocument.PropertySets["Inventor User Defined Properties"];
+
+            foreach (Inventor.PropertySet propertySetLoop in propertySet)
+            {
+                foreach (Inventor.Property propertyLoop in propertySetLoop)
+                {
+                    propertyName = propertyLoop.Name;
+                    ComboiProperty.Items.Add(propertyName);
+                }
+            }
+            //ComboiProperty.Refresh();
+        }*/
+        public Document GetActiveDoc()
+        {
+            invDocument = m_inventorApplication.ActiveDocument;
+            return invDocument;
+        }
+        public PropertySet GetPropertySet(Document invDoc)
+        {
+            PropertySet propertySet = invDoc.PropertySets["Inventor User Defined Properties"];
+            return propertySet;
         }
         #endregion
     }

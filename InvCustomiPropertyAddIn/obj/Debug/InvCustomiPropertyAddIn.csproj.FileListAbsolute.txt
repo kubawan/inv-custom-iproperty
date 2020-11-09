@@ -6,3 +6,5 @@ C:\Users\Kuba\Source\Repos\kubawan\inv-custom-iproperty\InvCustomiPropertyAddIn\
 C:\Users\Kuba\Source\Repos\kubawan\inv-custom-iproperty\InvCustomiPropertyAddIn\obj\Debug\InvCustomiPropertyAddIn.csproj.CopyComplete
 C:\Users\Kuba\Source\Repos\kubawan\inv-custom-iproperty\InvCustomiPropertyAddIn\obj\Debug\InvCustomiPropertyAddIn.dll
 C:\Users\Kuba\Source\Repos\kubawan\inv-custom-iproperty\InvCustomiPropertyAddIn\obj\Debug\InvCustomiPropertyAddIn.pdb
+C:\Users\Kuba\Source\Repos\kubawan\inv-custom-iproperty\InvCustomiPropertyAddIn\obj\Debug\InvAddIn.CmbBoxiProp.resources
+C:\Users\Kuba\Source\Repos\kubawan\inv-custom-iproperty\InvCustomiPropertyAddIn\obj\Debug\InvCustomiPropertyAddIn.csproj.GenerateResource.cache
