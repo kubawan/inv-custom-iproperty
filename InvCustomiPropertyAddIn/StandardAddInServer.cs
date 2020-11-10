@@ -6,6 +6,7 @@ using System.Windows.Forms;
 using stdole;
 using System.Drawing;
 using InvAddIn;
+using InvAddIn.Properties;
 
 namespace InvCustomiPropertyAddIn
 {
@@ -17,26 +18,28 @@ namespace InvCustomiPropertyAddIn
     [GuidAttribute("889caee5-3c6a-436f-b6a6-07731ed72ac3")]
     public class StandardAddInServer : Inventor.ApplicationAddInServer
     {
+        //Obiekt aplikacji inventor.
+        private Inventor.Application InvApplication;
+        //private Inventor.ApplicationEvents InvAppEventsSave;
+        private Inventor.ApplicationEvents PartDocCreate;
+        private Inventor.Document InvDocument;
+        private Inventor.PropertySet InvPropertySet;
+        private Inventor.Property InvProperty;
+        private Inventor.DocumentTypeEnum InvDocumentTypePart;
+        private Inventor.DocumentTypeEnum InvDocumentTypeAssembly;
+        private Inventor.ButtonDefinition AddiPropertyButtonDef;
+        private Inventor.UserInterfaceEvents InvUiEvents;
+        private readonly string m_ClientID = "{311a4c02-49df-4947-a01c-47765ec06b27}";
+        //Utworz isntancje klasy WinFormsa
+        private readonly CmbBoxiProp cmbBoxiProp = new CmbBoxiProp();
+        //Ikony przycisku
+        private readonly stdole.IPictureDisp  smallIconAddBtn = PictureConverter.ImageToPictureDisp(Resources._16_x_16);
+        private readonly stdole.IPictureDisp largeIconAddBtn = PictureConverter.ImageToPictureDisp(Resources._32_x_32);
 
-        // Inventor application object.
-        private Inventor.Application m_inventorApplication;
-        //private Inventor.ApplicationEvents m_appEventsSave;
-        private Inventor.ApplicationEvents m_appPartDocActive;
-        private Inventor.ApplicationEvents partDocCreate;
-        private Inventor.Document invDocument;
-        private Inventor.PropertySet invPropertySet;
-        private Inventor.Property invProperty;
-        private Inventor.DocumentTypeEnum invDocumentTypePart;
-        private Inventor.DocumentTypeEnum invDocumentTypeAssembly;
-        private Inventor.ButtonDefinition m_buttonDefCustomiProperties;
-        private Inventor.UserInterfaceEvents m_uiEvents;
-        private string m_ClientID = "{311a4c02-49df-4947-a01c-47765ec06b27}";
-
-
-        //Events handler delegates
+        //Delegaty wydarzen
         //private Inventor.DocumentEventsSink_OnSaveEventHandler DocumentEventsSink_OnSaveEventHandlerDelegate;
-        private Inventor.ApplicationEventsSink_OnNewDocumentEventHandler ApplicationEventsSink_OnNewDocumentEventHandler;
-        private Inventor.UserInterfaceEventsSink_OnResetRibbonInterfaceEventHandler UserInterfaceEventsSink_OnResetRibbonInterfaceEventHandler;
+        //private Inventor.ApplicationEventsSink_OnNewDocumentEventHandler ApplicationEventsSink_OnNewDocumentEventHandler;
+        //private Inventor.UserInterfaceEventsSink_OnResetRibbonInterfaceEventHandler UserInterfaceEventsSink_OnResetRibbonInterfaceEventHandler;
 
         public StandardAddInServer()
         {
@@ -51,37 +54,36 @@ namespace InvCustomiPropertyAddIn
             // The FirstTime flag indicates if the addin is loaded for the first time.
             try
             {
-                // Initialize AddIn members.
-                m_inventorApplication = addInSiteObject.Application;
+                //Inicjalizuj wtyczkê
+                InvApplication = addInSiteObject.Application;
 
                 /*
-                //Initialize save event delegate
-                m_appEventsSave = m_inventorApplication.ApplicationEvents;
+                //Inicjalizuj delegate wydarzenia "Save"
+                m_appEventsSave = InvApplication.ApplicationEvents;
                 m_appEventsSave.OnSaveDocument += new ApplicationEventsSink_OnSaveDocumentEventHandler(ApplicationEvents_OnSaveDocument);
                 */
+                //Inicjalizuj delegate wydarzenia "NewDocument:
+                PartDocCreate = InvApplication.ApplicationEvents;
+                PartDocCreate.OnNewDocument += new ApplicationEventsSink_OnNewDocumentEventHandler(ApplicationEvents_OnNewDocument);
 
-                //Initialize new document event delegate
-                partDocCreate = m_inventorApplication.ApplicationEvents;
-                partDocCreate.OnNewDocument += new ApplicationEventsSink_OnNewDocumentEventHandler(ApplicationEvents_OnNewDocument);
+                //Ustaw wskaznik UIManager na UserInterfaceManager
+                Inventor.UserInterfaceManager UIManager = InvApplication.UserInterfaceManager;
 
-                //Get a reference to the UserInterfaceManager object
-                Inventor.UserInterfaceManager UIManager = m_inventorApplication.UserInterfaceManager;
+                //Ustaw wskaxnik controlDef na ControlDefinition
+                Inventor.ControlDefinitions contorlDefs = InvApplication.CommandManager.ControlDefinitions;
 
-                //Get a reference to the ControlDefinitions object
-                Inventor.ControlDefinitions contorlDefs = m_inventorApplication.CommandManager.ControlDefinitions;
+                //Utworz definicje przycisku Add
+                AddiPropertyButtonDef = contorlDefs.AddButtonDefinition("Add iProperty", "AddCustomiPropertiesButton", CommandTypesEnum.kFilePropertyEditCmdType, m_ClientID,"Dodaj now¹ zmienn¹ iProperty","Kliknij aby dodaæ now¹ zmienn¹ iProperty", smallIconAddBtn, largeIconAddBtn);
 
-                //Create the button definition
-                m_buttonDefCustomiProperties = contorlDefs.AddButtonDefinition("Add", "AddCustomiPropertiesButton", CommandTypesEnum.kFilePropertyEditCmdType, m_ClientID);
-
-                //Call the function to add information to the userinterface
+                //Wywolaj przy uruchomieniu wtyczki aby utworzyc UI wtyczki
                 if (firstTime == true)
                 {
                     CreateUserInterface();
                 }
 
-                //Connect to UI events to be able to handle UI reset
-                m_uiEvents = m_inventorApplication.UserInterfaceManager.UserInterfaceEvents;
-                m_uiEvents.OnResetRibbonInterface += new UserInterfaceEventsSink_OnResetRibbonInterfaceEventHandler(m_uiEvents_OnResetRibbonInterface);
+                //Inicjalizuj delegate wydarzenia "RibbonReset"
+                InvUiEvents = InvApplication.UserInterfaceManager.UserInterfaceEvents;
+                InvUiEvents.OnResetRibbonInterface += new UserInterfaceEventsSink_OnResetRibbonInterfaceEventHandler(InvUiEvents_OnResetRibbonInterface);
 
             }
             catch (Exception ex)
@@ -100,17 +102,17 @@ namespace InvCustomiPropertyAddIn
             // TODO: Add ApplicationAddInServer.Deactivate implementation
 
             // Release objects.
-            m_inventorApplication = null;
+            InvApplication = null;
 
             /*
-            //Deactivate save event delegate
+            //Deaktywuj delegate "Save"
             m_appEventsSave.OnSaveDocument -= new ApplicationEventsSink_OnSaveDocumentEventHandler(ApplicationEvents_OnSaveDocument);
             m_appEventsSave = null;
             */
 
-            //Deactivate new document event delegate
-            partDocCreate.OnNewDocument -= new ApplicationEventsSink_OnNewDocumentEventHandler(ApplicationEvents_OnNewDocument);
-            partDocCreate = null;
+            //Deaktywuj delegate "NewDocument"
+            PartDocCreate.OnNewDocument -= new ApplicationEventsSink_OnNewDocumentEventHandler(ApplicationEvents_OnNewDocument);
+            PartDocCreate = null;
 
             GC.Collect();
             GC.WaitForPendingFinalizers();
@@ -138,63 +140,34 @@ namespace InvCustomiPropertyAddIn
 
         #endregion
         #region Methods
-
-        //Create AddIn UI ribbon method
+        //Metoda tworzenia UI wtyczki
         private void CreateUserInterface()
         {
-            //Get a reference to the UserManagerInterface object
-            Inventor.UserInterfaceManager UIManager = m_inventorApplication.UserInterfaceManager;
+            //Ustaw wskaznik UIManager na UserInterfaceManager
+            Inventor.UserInterfaceManager UIManager = InvApplication.UserInterfaceManager;
 
-            //Get the part doc ribbon
+            //Ustaw wskaznik na Ribbon Part
             Inventor.Ribbon partRibbon = UIManager.Ribbons["Part"];
 
-            //Get the Tools tab
+            //Ustaw wskaznik na RibbonTab Tools
             Inventor.RibbonTab toolsTab = partRibbon.RibbonTabs["id_TabTools"];
 
-            //Create new panel in Tools tab
-            Inventor.RibbonPanel newFeaturePanel = toolsTab.RibbonPanels.Add("iProperty", "ToolsTabCustomiProperty", m_ClientID, "id_PanelP_ToolsFind");
+            //Utworz nowy panel o nazwie iPropery w RibbonTab Tools
+            Inventor.RibbonPanel newFeaturePanel = toolsTab.RibbonPanels.Add("Custom iProperty", "ToolsTabCustomiProperty", m_ClientID, "id_PanelP_ToolsFind");
 
-            //Add a button to the panel, using previously created button def
-            newFeaturePanel.CommandControls.AddButton(m_buttonDefCustomiProperties, true);
+            //Utworz przycisk w nowym panelu wykorzystujac definicje przycisku
+            newFeaturePanel.CommandControls.AddButton(AddiPropertyButtonDef, true);
 
-            //Create the delegate object to handle button click event
-            m_buttonDefCustomiProperties.OnExecute += new ButtonDefinitionSink_OnExecuteEventHandler(m_buttonDefCustomiProperties_OnExecute);
+            //Utworz delegate na wydarzenie Button Click
+            AddiPropertyButtonDef.OnExecute += new ButtonDefinitionSink_OnExecuteEventHandler(AddiPropertyButtonDef_OnExecute);
         }
-        //Button click event method
-        private void m_buttonDefCustomiProperties_OnExecute(NameValueMap Context)
+        //Metoda wywo³ywana klikniêciem na przycisk Add
+        private void AddiPropertyButtonDef_OnExecute(NameValueMap Context)
         {
-            //MessageBox.Show("Dzia³am");
-            iPropertyUpdate();
+            //wywo³anie metody NewiPropertyItem
+            NewiPropertyItem();
         }
-        /*
-        //Save event method
-        private void ApplicationEvents_OnSaveDocument(_Document DocumentObject, EventTimingEnum BeforeOrAfter, NameValueMap Context, out HandlingCodeEnum HandlingCode)
-        {
-            HandlingCode = HandlingCodeEnum.kEventNotHandled;
-            if (BeforeOrAfter != EventTimingEnum.kAfter)
-            {
-                return;
-            }
-
-            //Acces part or assembly doc
-            invDocumentTypePart = DocumentTypeEnum.kPartDocumentObject;
-            if (m_inventorApplication.ActiveDocumentType == invDocumentTypePart)
-            {
-                //MessageBox.Show("Wtyczka weszla w plik typu part.", "Wtyczka - cutom iProperties", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                //Create custom iPoperty
-                TestiPropertyUpdate();
-            }
-            invDocumentTypeAssembly = DocumentTypeEnum.kAssemblyDocumentObject;
-            if (m_inventorApplication.ActiveDocumentType == invDocumentTypeAssembly)
-            {
-                //MessageBox.Show("Wtyczka weszla w plik typu assembly.", "Wtyczka - cutom iProperties", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                //Create custom iPoperty
-                TestiPropertyUpdate();
-            }
-
-            HandlingCode = HandlingCodeEnum.kEventHandled;
-        }
-        */
+        //Metoda wydarzenia NewDocument
         private void ApplicationEvents_OnNewDocument(_Document DocumentObject, EventTimingEnum BeforeOrAfter, NameValueMap Context, out HandlingCodeEnum HandlingCode)
         {
             HandlingCode = HandlingCodeEnum.kEventNotHandled;
@@ -203,87 +176,98 @@ namespace InvCustomiPropertyAddIn
                 return;
             }
 
-            //Acces part or assembly doc
-            invDocumentTypePart = DocumentTypeEnum.kPartDocumentObject;
-            if (m_inventorApplication.ActiveDocumentType == invDocumentTypePart)
+            //Uzyskaj dostep do plikow typu Part 
+            InvDocumentTypePart = DocumentTypeEnum.kPartDocumentObject;
+            if (InvApplication.ActiveDocumentType == InvDocumentTypePart)
             {
-                //MessageBox.Show("Wtyczka weszla w plik typu part.", "Wtyczka - cutom iProperties", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                //Create custom iPoperty
-                TestiPropertyUpdate();
+                //Wywolaj metode CreateBasiciProperty
+                CreateBasiciProperty();
             }
-            invDocumentTypeAssembly = DocumentTypeEnum.kAssemblyDocumentObject;
-            if (m_inventorApplication.ActiveDocumentType == invDocumentTypeAssembly)
-            {
-                //MessageBox.Show("Wtyczka weszla w plik typu assembly.", "Wtyczka - cutom iProperties", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                //Create custom iPoperty
-                TestiPropertyUpdate();
+            //Uzyskaj dostep do plikow typu Assemblu
+            InvDocumentTypeAssembly = DocumentTypeEnum.kAssemblyDocumentObject;
+            if (InvApplication.ActiveDocumentType == InvDocumentTypeAssembly)
+            {              
+                //Wywolaj metode CreateBasiciProperty
+                CreateBasiciProperty();
             }
 
-            DockableWindow();
+            //W momencie utworzenia nowego dokumentu dodaj DockWindow
+            CreateDockableWindow();
+
+            //W momencie utworzenia nowego dokumentu wyczysc ComBoxa w DockWindow
+            cmbBoxiProp.ComboBoxiPropClear();
 
             HandlingCode = HandlingCodeEnum.kEventHandled;
         }
-        private void m_uiEvents_OnResetRibbonInterface(NameValueMap Context)
+        //Metoda wydarzenia RibbonReset
+        private void InvUiEvents_OnResetRibbonInterface(NameValueMap Context)
         {
+            //Utworz na nowo UserInterface
             CreateUserInterface();
         }
-        private string GetPropertyName()
+        //Metoda AddiPropertySetName zwraca string z nazwa zmiennej iProperty
+        private string AddiPropertySetName()
         {
+            //Popros uzytkownika o wprowadzenie nazwy nowej iProperty
             string getPropertyName = Microsoft.VisualBasic.Interaction.InputBox("WprowadŸ nazwê: ", "Custom iProperty", "Nazwa zmiennej iProperty");
             return getPropertyName;
         }
-        private string GetPropertyValue()
+        //Metoda AddiPropertySetValue zwraca string z wartoscia zmiennej iProperty
+        private string AddiPropertySetValue()
         {
+            //Popros uzytkownika o wprowadzenie wartosci nowej iProperty
             string getPropertyValue = Microsoft.VisualBasic.Interaction.InputBox("WporwadŸ wartoœæ: ", "Custom iProperty", "Wartoœæ zmiennej iProperty");
             return getPropertyValue;
         }
-        private void iPropertyUpdate()
+        //Metoda NewiPropertyItem tworzy now¹ zmienn¹ iProperty
+        public void NewiPropertyItem()
         {
-            //Get active document
-            invDocument = m_inventorApplication.ActiveDocument;
-            //Add new custom iProperty
-            UpdateCustomiProperties(invDocument, GetPropertyName(), GetPropertyValue());
+            //Ustaw wskaznik na aktywny dokument
+            InvDocument = InvApplication.ActiveDocument;
+            //Wywoluje metode UpdateOrCreateCustomiProperty / dodaje nowa zmienna iProperty
+            UpdateOrCreateCustomiProperty(InvDocument, AddiPropertySetName(), AddiPropertySetValue());
         }
-        //Add custom iProperty methods
-        private void TestiPropertyUpdate()
+        //Metoda tworzy cztery podstawowe iProperties
+        private void CreateBasiciProperty()
         {
-            //Get active document
-            invDocument = m_inventorApplication.ActiveDocument;
-            //MessageBox.Show("Wywolano TestiPropertyUpdate.", "Wtyczka - custom iProperty", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            UpdateCustomiProperties(invDocument, "Malowanie", "");
-            UpdateCustomiProperties(invDocument, "Obróbka plastyczna", "");
-            UpdateCustomiProperties(invDocument, "Obróbka skrawaniem", "");
-            UpdateCustomiProperties(invDocument, "Obróka powierzchniowa", "");
+            //Ustaw wskaznik na aktywny dokument
+            InvDocument = InvApplication.ActiveDocument;
+            //Tworzy cztery podstawowe iProperties wywolujac funkcje UpdateOrCreateCustomiProperty
+            UpdateOrCreateCustomiProperty(InvDocument, "Malowanie", "");
+            UpdateOrCreateCustomiProperty(InvDocument, "Obróbka plastyczna", "");
+            UpdateOrCreateCustomiProperty(InvDocument, "Obróbka skrawaniem", "");
+            UpdateOrCreateCustomiProperty(InvDocument, "Obróka powierzchniowa", "");
         }
-        public void UpdateCustomiProperties(Inventor.Document Document, string PropertyName, string PropertyValue)
+        //Metoda sprawdza czy istnieje i dodaje lub aktualizuje zmienna iProperty
+        public void UpdateOrCreateCustomiProperty(Inventor.Document Document, string PropertyName, string PropertyValue)
         {
-            //MessageBox.Show("Wywolano UpdateCustomiProperties", "Wtyczka - custom iProperty", MessageBoxButtons.OK, MessageBoxIcon.Information);
             try
             {
-                //Get custom property set
-                invPropertySet = invDocument.PropertySets["Inventor User Defined Properties"];
+                //Wskaznik na PropertySet Custom iProperty
+                InvPropertySet = Document.PropertySets["Inventor User Defined Properties"];
 
-                //Get existing property if exsist
-                invProperty = null;
+                //Sprawdza czy istnieje wskazana zmienna jezeli tak ustawia na nia wskaznik, jezeli nie ustawia Bool propertyExist na false 
+                InvProperty = null;
                 Boolean propertyExists = true;
                 try
                 {
-                    invProperty = invPropertySet[PropertyName];
+                    InvProperty = InvPropertySet[PropertyName];
                 }
-                catch (Exception ex)
+                catch
                 {
                     propertyExists = false;
                 }
 
-                //Check to see if the property was obtained succesfully
+                //Sprawdza czy w poprzednim kroku pozyskano nazwe zmiennej
                 if (!propertyExists)
                 {
-                    //Failed to get the exsisting property so create new one
-                    invProperty = invPropertySet.Add(PropertyValue, PropertyName, null);
+                    //Nie udalo sie pozyskac nazwy istniejacej zmiennej wiec tworzy ja
+                    InvProperty = InvPropertySet.Add(PropertyValue, PropertyName, null);
                 }
                 else
                 {
-                    invProperty.Value = PropertyValue;
+                    //Udalo sie pozyskac nazwe istniejacej zmiennej wiec aktualizuje jedynie jej wartosc
+                    InvProperty.Value = PropertyValue;
                 }
             }
             catch (Exception ex)
@@ -291,46 +275,27 @@ namespace InvCustomiPropertyAddIn
                 MessageBox.Show(ex.ToString(), "AddIn Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-        public void DockableWindow()
+        //Metoda tworzy DockWindow
+        public void CreateDockableWindow()
         {
-            //Create Dockable Window iProperty
-            Inventor.UserInterfaceManager uiManager = m_inventorApplication.UserInterfaceManager;
-            Inventor.DockableWindow dockWindow;
-            dockWindow = uiManager.DockableWindows.Add(m_ClientID, "CustomiProperty", "iProperty");
-
-            InvAddIn.CmbBoxiProp FrmComboBox = new InvAddIn.CmbBoxiProp();
-            //Create WinForm in dockWindow
+            //Ustawia wskaznik na UserInterfaceManager
+            Inventor.UserInterfaceManager uiManager = InvApplication.UserInterfaceManager;
+            //Dodaje nowe DockWindow o nazwie iProperty
+            Inventor.DockableWindow dockWindow = uiManager.DockableWindows.Add(m_ClientID, "CustomiProperty", "iProperty");
+            //Prametry DockWindow
+            //Nie widoczne przy starcie
             dockWindow.Visible = false;
+            //Nie mozna zadokowac przy gornej i dolnej krawedzi
             dockWindow.DisabledDockingStates = DockingStateEnum.kDockTop;
-            dockWindow.AddChild(FrmComboBox.Handle);
-            FrmComboBox.Show();
-        }
-        /*public void AddItemsComboBox()
-        {
-            string propertyName;
+            dockWindow.DisabledDockingStates = DockingStateEnum.kDockBottom;
+            //Tworzy instancje klasy z WinForm
             InvAddIn.CmbBoxiProp FrmComboBox = new InvAddIn.CmbBoxiProp();
-            invDocument = m_inventorApplication.ActiveDocument;
-            PropertySet propertySet = invDocument.PropertySets["Inventor User Defined Properties"];
-
-            foreach (Inventor.PropertySet propertySetLoop in propertySet)
-            {
-                foreach (Inventor.Property propertyLoop in propertySetLoop)
-                {
-                    propertyName = propertyLoop.Name;
-                    ComboiProperty.Items.Add(propertyName);
-                }
-            }
-            //ComboiProperty.Refresh();
-        }*/
-        public Document GetActiveDoc()
-        {
-            invDocument = m_inventorApplication.ActiveDocument;
-            return invDocument;
-        }
-        public PropertySet GetPropertySet(Document invDoc)
-        {
-            PropertySet propertySet = invDoc.PropertySets["Inventor User Defined Properties"];
-            return propertySet;
+            //Dodaje do DockWindow WinForma
+            dockWindow.AddChild(FrmComboBox.Handle);
+            //Wyswietla utworzonego WinForma
+            FrmComboBox.Show();
+            //Wywolaj metode GetiPropertyName z WinFormsa, pierwsze wypelnienie ComBoxa tym co jest w pliku na dzien dobry
+            cmbBoxiProp.GetiPropertyName();
         }
         #endregion
     }
