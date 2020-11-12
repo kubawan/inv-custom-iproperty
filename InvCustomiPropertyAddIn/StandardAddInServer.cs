@@ -30,11 +30,9 @@ namespace InvCustomiPropertyAddIn
         private Inventor.ButtonDefinition AddiPropertyButtonDef;
         private Inventor.UserInterfaceEvents InvUiEvents;
         private readonly string m_ClientID = "{311a4c02-49df-4947-a01c-47765ec06b27}";
-        //Utworz isntancje klasy WinFormsa
-        private readonly CmbBoxiProp cmbBoxiProp = new CmbBoxiProp();
         //Ikony przycisku
-        private readonly stdole.IPictureDisp  smallIconAddBtn = PictureConverter.ImageToPictureDisp(Resources._16_x_16);
-        private readonly stdole.IPictureDisp largeIconAddBtn = PictureConverter.ImageToPictureDisp(Resources._32_x_32);
+        private readonly stdole.IPictureDisp  smallIconAddBtn = PictureConverter.ImageToPictureDisp(Resources._16_x_16_vol_3);
+        private readonly stdole.IPictureDisp largeIconAddBtn = PictureConverter.ImageToPictureDisp(Resources._32_x_32_vol_3);
 
         //Delegaty wydarzen
         //private Inventor.DocumentEventsSink_OnSaveEventHandler DocumentEventsSink_OnSaveEventHandlerDelegate;
@@ -153,7 +151,7 @@ namespace InvCustomiPropertyAddIn
             Inventor.RibbonTab toolsTab = partRibbon.RibbonTabs["id_TabTools"];
 
             //Utworz nowy panel o nazwie iPropery w RibbonTab Tools
-            Inventor.RibbonPanel newFeaturePanel = toolsTab.RibbonPanels.Add("Custom iProperty", "ToolsTabCustomiProperty", m_ClientID, "id_PanelP_ToolsFind");
+            Inventor.RibbonPanel newFeaturePanel = toolsTab.RibbonPanels.Add("Custom iProperty", "ToolsTabCustomiProperty", m_ClientID, "id_PanelP_ToolsFind", true);
 
             //Utworz przycisk w nowym panelu wykorzystujac definicje przycisku
             newFeaturePanel.CommandControls.AddButton(AddiPropertyButtonDef, true);
@@ -164,8 +162,9 @@ namespace InvCustomiPropertyAddIn
         //Metoda wywo³ywana klikniêciem na przycisk Add
         private void AddiPropertyButtonDef_OnExecute(NameValueMap Context)
         {
-            //wywo³anie metody NewiPropertyItem
-            NewiPropertyItem();
+            //otworz okno WinForm Add iProperty
+            AddiProperty addiProperty = new AddiProperty();
+            addiProperty.ShowDialog();
         }
         //Metoda wydarzenia NewDocument
         private void ApplicationEvents_OnNewDocument(_Document DocumentObject, EventTimingEnum BeforeOrAfter, NameValueMap Context, out HandlingCodeEnum HandlingCode)
@@ -194,9 +193,6 @@ namespace InvCustomiPropertyAddIn
             //W momencie utworzenia nowego dokumentu dodaj DockWindow
             CreateDockableWindow();
 
-            //W momencie utworzenia nowego dokumentu wyczysc ComBoxa w DockWindow
-            cmbBoxiProp.ComboBoxiPropClear();
-
             HandlingCode = HandlingCodeEnum.kEventHandled;
         }
         //Metoda wydarzenia RibbonReset
@@ -204,28 +200,6 @@ namespace InvCustomiPropertyAddIn
         {
             //Utworz na nowo UserInterface
             CreateUserInterface();
-        }
-        //Metoda AddiPropertySetName zwraca string z nazwa zmiennej iProperty
-        private string AddiPropertySetName()
-        {
-            //Popros uzytkownika o wprowadzenie nazwy nowej iProperty
-            string getPropertyName = Microsoft.VisualBasic.Interaction.InputBox("WprowadŸ nazwê: ", "Custom iProperty", "Nazwa zmiennej iProperty");
-            return getPropertyName;
-        }
-        //Metoda AddiPropertySetValue zwraca string z wartoscia zmiennej iProperty
-        private string AddiPropertySetValue()
-        {
-            //Popros uzytkownika o wprowadzenie wartosci nowej iProperty
-            string getPropertyValue = Microsoft.VisualBasic.Interaction.InputBox("WporwadŸ wartoœæ: ", "Custom iProperty", "Wartoœæ zmiennej iProperty");
-            return getPropertyValue;
-        }
-        //Metoda NewiPropertyItem tworzy now¹ zmienn¹ iProperty
-        public void NewiPropertyItem()
-        {
-            //Ustaw wskaznik na aktywny dokument
-            InvDocument = InvApplication.ActiveDocument;
-            //Wywoluje metode UpdateOrCreateCustomiProperty / dodaje nowa zmienna iProperty
-            UpdateOrCreateCustomiProperty(InvDocument, AddiPropertySetName(), AddiPropertySetValue());
         }
         //Metoda tworzy cztery podstawowe iProperties
         private void CreateBasiciProperty()
@@ -294,8 +268,6 @@ namespace InvCustomiPropertyAddIn
             dockWindow.AddChild(FrmComboBox.Handle);
             //Wyswietla utworzonego WinForma
             FrmComboBox.Show();
-            //Wywolaj metode GetiPropertyName z WinFormsa, pierwsze wypelnienie ComBoxa tym co jest w pliku na dzien dobry
-            cmbBoxiProp.GetiPropertyName();
         }
         #endregion
     }

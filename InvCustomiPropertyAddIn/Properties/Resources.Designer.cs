@@ -63,9 +63,9 @@ namespace InvAddIn.Properties {
         /// <summary>
         ///   Wyszukuje zlokalizowany zasób typu System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap _16_x_16 {
+        internal static System.Drawing.Bitmap _16_x_16_vol_3 {
             get {
-                object obj = ResourceManager.GetObject("_16_x_16", resourceCulture);
+                object obj = ResourceManager.GetObject("_16_x_16_vol_3", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -73,9 +73,9 @@ namespace InvAddIn.Properties {
         /// <summary>
         ///   Wyszukuje zlokalizowany zasób typu System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap _32_x_32 {
+        internal static System.Drawing.Bitmap _32_x_32_vol_3 {
             get {
-                object obj = ResourceManager.GetObject("_32_x_32", resourceCulture);
+                object obj = ResourceManager.GetObject("_32_x_32_vol_3", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

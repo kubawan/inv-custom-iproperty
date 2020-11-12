@@ -109,6 +109,12 @@
     <Compile Include="ComboBox.Designer.cs">
       <DependentUpon>ComboBox.cs</DependentUpon>
     </Compile>
+    <Compile Include="AddiProperty.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AddiProperty.Designer.cs">
+      <DependentUpon>AddiProperty.cs</DependentUpon>
+    </Compile>
     <Compile Include="PictureConverter.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -132,6 +138,9 @@
     <None Include="Readme.txt" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="AddiProperty.resx">
+      <DependentUpon>AddiProperty.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="ComboBox.resx">
       <DependentUpon>ComboBox.cs</DependentUpon>
     </EmbeddedResource>
@@ -141,10 +150,10 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\32 x 32 vol.2.png" />
+    <None Include="Resources\32 x 32 vol.3.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\16 x 16 vol.2.png" />
+    <None Include="Resources\16 x 16 vol.3.png" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

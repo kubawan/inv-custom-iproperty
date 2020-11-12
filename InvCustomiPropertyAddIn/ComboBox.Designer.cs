@@ -42,17 +42,20 @@ namespace InvAddIn
             // 
             // ComboBoxiProp
             // 
+            this.ComboBoxiProp.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.ComboBoxiProp.FormattingEnabled = true;
-            this.ComboBoxiProp.Location = new System.Drawing.Point(12, 29);
+            this.ComboBoxiProp.Location = new System.Drawing.Point(15, 29);
             this.ComboBoxiProp.Name = "ComboBoxiProp";
-            this.ComboBoxiProp.Size = new System.Drawing.Size(247, 24);
+            this.ComboBoxiProp.Size = new System.Drawing.Size(251, 24);
             this.ComboBoxiProp.TabIndex = 0;
+            this.ComboBoxiProp.SelectedIndexChanged += new System.EventHandler(this.ComboBoxiProp_SelectedIndexChanged);
+            this.ComboBoxiProp.Click += new System.EventHandler(this.ComboBoxiProp_Click);
             // 
             // BtnUpdate
             // 
             this.BtnUpdate.Location = new System.Drawing.Point(140, 210);
             this.BtnUpdate.Name = "BtnUpdate";
-            this.BtnUpdate.Size = new System.Drawing.Size(122, 30);
+            this.BtnUpdate.Size = new System.Drawing.Size(126, 30);
             this.BtnUpdate.TabIndex = 1;
             this.BtnUpdate.Text = "Aktualizuj";
             this.BtnUpdate.UseVisualStyleBackColor = true;
@@ -60,16 +63,16 @@ namespace InvAddIn
             // 
             // TxtBoxiPropVal
             // 
-            this.TxtBoxiPropVal.Location = new System.Drawing.Point(12, 76);
+            this.TxtBoxiPropVal.Location = new System.Drawing.Point(15, 76);
             this.TxtBoxiPropVal.Multiline = true;
             this.TxtBoxiPropVal.Name = "TxtBoxiPropVal";
-            this.TxtBoxiPropVal.Size = new System.Drawing.Size(247, 128);
+            this.TxtBoxiPropVal.Size = new System.Drawing.Size(251, 128);
             this.TxtBoxiPropVal.TabIndex = 2;
             // 
             // LblAktWartiProp
             // 
             this.LblAktWartiProp.AutoSize = true;
-            this.LblAktWartiProp.Location = new System.Drawing.Point(9, 243);
+            this.LblAktWartiProp.Location = new System.Drawing.Point(12, 243);
             this.LblAktWartiProp.Name = "LblAktWartiProp";
             this.LblAktWartiProp.Size = new System.Drawing.Size(115, 17);
             this.LblAktWartiProp.TabIndex = 3;
@@ -80,14 +83,14 @@ namespace InvAddIn
             this.TxtBoxAktWartiProp.Location = new System.Drawing.Point(15, 263);
             this.TxtBoxAktWartiProp.Multiline = true;
             this.TxtBoxAktWartiProp.Name = "TxtBoxAktWartiProp";
-            this.TxtBoxAktWartiProp.Size = new System.Drawing.Size(247, 137);
+            this.TxtBoxAktWartiProp.ReadOnly = true;
+            this.TxtBoxAktWartiProp.Size = new System.Drawing.Size(251, 137);
             this.TxtBoxAktWartiProp.TabIndex = 4;
-            this.TxtBoxAktWartiProp.TextChanged += new System.EventHandler(this.TxtBoxAktWartiProp_TextChanged);
             // 
             // LblNewiPropVal
             // 
             this.LblNewiPropVal.AutoSize = true;
-            this.LblNewiPropVal.Location = new System.Drawing.Point(9, 56);
+            this.LblNewiPropVal.Location = new System.Drawing.Point(12, 56);
             this.LblNewiPropVal.Name = "LblNewiPropVal";
             this.LblNewiPropVal.Size = new System.Drawing.Size(95, 17);
             this.LblNewiPropVal.TabIndex = 5;
@@ -96,7 +99,7 @@ namespace InvAddIn
             // LblCmbBoxName
             // 
             this.LblCmbBoxName.AutoSize = true;
-            this.LblCmbBoxName.Location = new System.Drawing.Point(9, 9);
+            this.LblCmbBoxName.Location = new System.Drawing.Point(12, 9);
             this.LblCmbBoxName.Name = "LblCmbBoxName";
             this.LblCmbBoxName.Size = new System.Drawing.Size(116, 17);
             this.LblCmbBoxName.TabIndex = 6;
@@ -104,7 +107,7 @@ namespace InvAddIn
             // 
             // AddButton
             // 
-            this.AddButton.Location = new System.Drawing.Point(12, 210);
+            this.AddButton.Location = new System.Drawing.Point(15, 210);
             this.AddButton.Name = "AddButton";
             this.AddButton.Size = new System.Drawing.Size(122, 30);
             this.AddButton.TabIndex = 7;

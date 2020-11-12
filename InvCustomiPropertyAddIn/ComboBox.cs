@@ -20,7 +20,8 @@ namespace InvAddIn
         Inventor.Document InvDocument;
         Inventor.PropertySet InvPropertySet;
         Inventor.Property InvProperty;
-
+        //Definiuje nowa liste
+        List<string> PropertyNameList = new List<string>();
         //Konstruktor klasy inicjalizujacy WinFormsa
         public CmbBoxiProp()
         {
@@ -30,42 +31,42 @@ namespace InvAddIn
         //Przycisk aktualizuj
         private void BtnUpdate_Click(object sender, EventArgs e)
         {
+            InvApplication = (Inventor.Application)Marshal.GetActiveObject("Inventor.Application");
+            InvDocument = InvApplication.ActiveDocument;
             //Jezeli wybrano iProperty
-            if (ComboBoxiProp.Text != null)
+            if (String.IsNullOrWhiteSpace(ComboBoxiProp.Text) == false)
             {
                 //Aktualizuj jej wartosc
                 UpdateOrCreateCustomiProperty(InvDocument, ComboBoxiProp.Text, TxtBoxiPropVal.Text);
-                //Aktualizuj ComBoxa
-                GetiPropertyName();
-                TxtBoxAktWartiProp.Clear();
             }
             else
             {
                 MessageBox.Show("Brak nazwy zmiennej iProperty!", "Custom iProperty", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
+            //Czysc TextBoxa
+            TxtBoxiPropVal.Clear();
+            //Ustaw nowa wartosc pola Aktualna Wartosc
+            TxtBoxAktWartFill();
         }
         //Przycisk dodaj
         private void AddButton_Click(object sender, EventArgs e)
         {
-            try
-            {
-                //Stworz nowa zmienna
-                UpdateOrCreateCustomiProperty(InvDocument, ComboBoxiProp.Text, TxtBoxiPropVal.Text);
-                //Aktualizuj ComBoxa
-                GetiPropertyName();
-                TxtBoxAktWartiProp.Clear();
-
-            }
-            catch
-            {
-                MessageBox.Show("Brak nazwy zmiennej iProperty!", "Custom iProperty", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            }
+            AddiProperty addiProperty = new AddiProperty();
+            addiProperty.ShowDialog();
+        }
+        private void ComboBoxiProp_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            TxtBoxAktWartFill();
+        }
+        private void ComboBoxiProp_Click(object sender, EventArgs e)
+        {
+            ComboBoxiPropFill();
         }
         #endregion
         #region OtherMethods
         public void UpdateOrCreateCustomiProperty(Inventor.Document Document, string PropertyName, string PropertyValue)
         {
-
+            InvDocument = InvApplication.ActiveDocument;
             try
             {
                 //Wskaznik na PropertySet Custom iProperty
@@ -97,51 +98,60 @@ namespace InvAddIn
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.ToString(), "AddIn Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(ex.Message);
             }
         }
         public void GetiPropertyName()
         {
+            InvApplication = (Inventor.Application)Marshal.GetActiveObject("Inventor.Application");
+            InvDocument = InvApplication.ActiveDocument;
             string propertyName;
             try
             {
-                //Wskaznik na aktywna instancje Inventora
-                InvApplication = (Inventor.Application)Marshal.GetActiveObject("Inventor.Application");
-                //Wskaznik na aktywny dokument
-                InvDocument = InvApplication.ActiveDocument;
                 //Wskaznik na zbior PropertySet custom
                 InvPropertySet = InvDocument.PropertySets["Inventor User Defined Properties"];
-                //Wyczsc ComBoxa
-                ComboBoxiProp.Items.Clear();
+                PropertyNameList.Clear();
                 //Wypelnij ComBoxa nazwami zmiennych iProperty ze zbioru PropertySet
                 foreach (Inventor.Property propertyLoop in InvPropertySet)
                 {
                     propertyName = propertyLoop.Name;
-                    ComboBoxiProp.Items.Add(propertyName);
+                    PropertyNameList.Add(propertyName);
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.ToString());
+                MessageBox.Show(ex.Message);
             }
         }
-        public void ComboBoxiPropClear()
+        public void ComboBoxiPropFill()
         {
             ComboBoxiProp.Items.Clear();
+            GetiPropertyName();
+            foreach(string element in PropertyNameList)
+            {
+                ComboBoxiProp.Items.Add(element);
+            }
+        }
+        public void TxtBoxAktWartFill()
+        {
+            try
+            {
+                TxtBoxAktWartiProp.Clear();
+                //Wskaznik na zbior PropertySet custom
+                InvPropertySet = InvDocument.PropertySets["Inventor User Defined Properties"];
+                foreach (Inventor.Property propertyLoop in InvPropertySet)
+                {
+                    if (ComboBoxiProp.SelectedItem.ToString() == propertyLoop.Name)
+                    {
+                        TxtBoxAktWartiProp.Text = propertyLoop.Value.ToString();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
         }
         #endregion
-
-        private void TxtBoxAktWartiProp_TextChanged(object sender, EventArgs e)
-        {
-            object propertyValue;
-            object ComboBoxiPropItem = ComboBoxiProp.SelectedItem;
-            InvApplication = (Inventor.Application)Marshal.GetActiveObject("Inventor.Application");
-            InvDocument = InvApplication.ActiveDocument;
-            InvPropertySet = InvDocument.PropertySets["Inventor User Defined Properties"];
-            InvProperty = InvPropertySet[ComboBoxiPropItem];
-            TxtBoxAktWartiProp.Clear();
-            propertyValue = InvProperty.Value;
-            TxtBoxAktWartiProp.Text = propertyValue.ToString();
-        }
     }
 }
